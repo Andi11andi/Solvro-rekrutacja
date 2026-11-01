@@ -4,48 +4,84 @@ Analiza i badanie sygnałów audio z datasetu **LJ Speech** przy użyciu Pythona
 
 ---
 
-##  Analiza spektrogramu i odpowiedzi na pytania badawcze
+# Analiza spektrogramu sygnału mowy
 
-### 1. Co można wywnioskować o znajdującym się tam dźwięku ze spektrogramu?
-* **Źródło dźwięku:** Wyraźnie widoczna struktura harmoniczna (równoległe poziome pasma) wskazuje na obecność ludzkiego głosu (lub instrumentu muzycznego), a nie zwykłego szumu białego.
-* **Typy dźwięków:**
-  * **Samogłoski:** Charakteryzują się jasnymi, gęstymi pasmami formantowymi o dużej energii.
-  * **Spółgłoski:** Spółgłoski bezdźwięczne (np. [s], [sh]) wyglądają jak wysokoczęstotliwościowe strefy szumowe, a zwarte/wybuchowe ([p], [t]) — jak krótkie, pionowe impulsy.
-* **Intonacja i rytm:** Zmiana wysokości tonu podstawowego ($F_0$) odzwierciedla się w postaci falistego wygięcia harmonik. Pauzy między słowami widoczne są jako pionowe przerwy o zerowej lub minimalnej energii.
+## 1. Co można wywnioskować z dźwięku na podstawie spektrogramu?
 
----
+Spektrogram pokazuje, jak energia sygnału rozkłada się w czasie i w różnych zakresach częstotliwości.
 
-### 2. Jakie informacje są widoczne, a jakich nie da się wiarygodnie odczytać?
-* **Informacje widoczne:**
-  * Rozkład energii sygnału w funkcji częstotliwości i czasu.
-  * Tempo mowy, czas trwania sylab oraz struktura pauz.
-  * Kontur melodyczny wypowiedzi (wznoszenie lub opadanie intonacji).
-* **Informacje ukryte / Trudne do odczytania:**
-  * **Dokładny tekst mowy:** Prawie niemożliwe jest "przeczytanie" dokładnego tekstu bezpośrednio ze spektrogramu bez specjalistycznego przygotowania, ze względu na indywidualne cechy artykulacji.
-  * **Informacja o fazie:** Klasyczny spektrogram amplitudowy całkowicie ignoruje fazę fali akustycznej.
-  * **Mikrodetale barwy głosu:** Drobne odcienie emocjonalne lub subtelne cechy akustyczne otoczenia/mikrofonu są często maskowane przez ogólne spektrum.
+Na jego podstawie można zaobserwować między innymi:
 
----
+- **Strukturę harmoniczną** – charakterystyczną dla dźwięków dźwięcznych, takich jak samogłoski.
+- **Formanty (F1, F2, F3)** – pasma częstotliwości związane z artykulacją samogłosek.
+- **Spółgłoski bezdźwięczne** – często widoczne jako szum o szerokim zakresie częstotliwości.
+- **Zwarcia i wybuchy spółgłosek zwarto-wybuchowych** – mogą być widoczne jako krótkie, pionowe struktury o dużej energii.
+- **Intonację i rytm wypowiedzi** – można obserwować zmiany wysokości tonu podstawowego oraz przerwy między fragmentami mowy.
 
-### 3. Najważniejsze cechy sygnału do rozpoznania lub odtworzenia
-Przy przygotowywaniu danych dla modeli **TTS** (Text-to-Speech) lub **ASR** (Automatic Speech Recognition) kluczowe znaczenie mają:
-1. **Formanty ($F_1, F_2, F_3$):** Częstotliwości rezonansowe traktu głosowego, które określają konkretne fonemy.
-2. **Ton podstawowy ($F_0$):** Określa wysokość głosu, melodię oraz zabarwienie intonacyjne.
-3. **Spektrogram Mel-skalowy (Mel-Spectrogram):** Reprezentacja częstotliwości w skali logarytmicznej, modelująca ludzką percepcję słuchową (wysoka szczegółowość niskich częstotliwości i mniejsza wysokich).
+## 2. Jakie informacje są widoczne, a jakich nie można wiarygodnie odczytać?
 
----
+Spektrogram pozwala zaobserwować:
 
-### 4. Stopniowe usuwanie informacji ze spektrogramu
-* **Co może zniknąć bez większej straty (pierwszy etap):**
-  * Wysokie częstotliwości powyżej 7–8 kHz (ludzka mowa pozostaje w pełni zrozumiała i czytelna).
-  * Informacja o fazie oraz drobny szum kwantyzacji wysokich częstotliwości.
-* **Co powinno zostać jak najdłużej (krytyczne):**
-  * Trajektorie pierwszych formantów ($F_1, F_2$) oraz kontur tonu podstawowego ($F_0$). Bez nich mowa zamienia się w niezrozumiały szum lub metaliczny pomruk.
-  * Synchronizacja czasowa pików energetycznych (czas trwania słów i pauz).
+- rozkład energii w czasie i częstotliwości,
+- strukturę i długość poszczególnych fragmentów wypowiedzi,
+- obecność przerw i zmian energii,
+- część cech artykulacyjnych, np. formanty i charakterystyczne pasma szumowe,
+- zmiany wysokości tonu podstawowego w dźwiękach dźwięcznych.
 
----
+Nie pozwala jednak bezpośrednio i wiarygodnie odczytać:
 
-### 5. Jak sprawdzić, czy hipotezy są poprawne?
-1. **Synteza powrotna (Resynthesis):** Modyfikacja spektrogramu w Pythonie i rekonstrukcja audio za pomocą **algorytmu Griffina-Lima** lub wokodera neuralnego (**HiFi-GAN**) w celu oceny słuchowej.
-2. **Obiektywne metryki jakości:** Wykorzystanie metryk takich jak **PESQ** (Perceptual Evaluation of Speech Quality) oraz **STOI** (Short-Time Objective Intelligibility) do pomiaru degradacji sygnału.
-3. **Testowanie ASR:** Przekazanie zmodyfikowanego audio na wejście modelu rozpoznawania mowy (np. Whisper) w celu zmierzenia wskaźnika błędów w transkrypcji (**WER — Word Error Rate**).
+- dokładnej treści wypowiedzi,
+- fazy sygnału na podstawie samego wykresu amplitudy spektrogramu,
+- wszystkich szczegółów artykulacyjnych,
+- emocji i intencji mówiącego,
+- dokładnych warunków nagrania, takich jak rodzaj mikrofonu czy pomieszczenie.
+
+Spektrogram jest więc użytecznym narzędziem analizy, ale nie przedstawia wszystkich informacji zawartych w oryginalnym sygnale.
+
+## 3. Które cechy sygnału są najważniejsze dla rozpoznawania i odtwarzania mowy?
+
+Istotne są przede wszystkim:
+
+- **Formanty (F1, F2, F3)** – dostarczają informacji o artykulacji samogłosek.
+- **Ton podstawowy (F0)** – odpowiada za wysokość głosu i jest ważny dla intonacji oraz naturalności mowy.
+- **Struktura czasowa** – długość głosek, sylab i przerw wpływa na zrozumiałość wypowiedzi.
+- **Charakterystyka widmowa spółgłosek** – szczególnie ważna dla rozróżniania głosek szczelinowych i syczących.
+- **Energia sygnału** – pomaga rozróżniać fragmenty wypowiedzi i ciszę.
+
+Znaczenie poszczególnych cech zależy od analizowanego dźwięku i rodzaju zadania. Inne informacje mogą być najważniejsze dla rozpoznawania słów, a inne dla wiernego odtwarzania głosu.
+
+## 4. Co można usuwać ze spektrogramu, a jakie informacje powinny pozostać najdłużej?
+
+Informacje można usuwać stopniowo, obserwując wpływ zmian na zrozumiałość i jakość odtwarzanego dźwięku.
+
+W pierwszej kolejności można sprawdzić wpływ ograniczenia bardzo wysokich częstotliwości oraz szczegółów, które mają mniejsze znaczenie dla danego fragmentu sygnału.
+
+Nie należy jednak zakładać, że pasmo powyżej 7–8 kHz jest całkowicie zbędne. Zawiera ono między innymi energię niektórych spółgłosek szczelinowych i syczących, która może być istotna dla rozróżniania fonemów.
+
+Informacje, których utrata może być szczególnie zauważalna, to:
+
+- formanty, ważne dla rozpoznawania samogłosek,
+- charakterystyczne składowe widmowe spółgłosek,
+- struktura czasowa i długość poszczególnych dźwięków,
+- ton podstawowy, ważny dla zachowania intonacji i naturalności głosu.
+
+Nie oznacza to, że utrata jednej z tych cech zawsze uniemożliwi rozpoznanie mowy. Wpływ usunięcia poszczególnych informacji należy oceniać eksperymentalnie.
+
+## 5. Jak sprawdzić, czy postawione hipotezy są poprawne?
+
+Można przygotować kilka zmodyfikowanych wersji tego samego nagrania, stopniowo ograniczając wybrane zakresy częstotliwości lub usuwając określone informacje ze spektrogramu.
+
+Następnie można:
+
+1. Odsłuchać oryginalne i zmodyfikowane nagrania.
+2. Porównać ich zrozumiałość i jakość.
+3. Sprawdzić, czy system rozpoznawania mowy poprawnie rozpoznaje wypowiedziane słowa.
+4. Porównać wyniki dla różnych wariantów sygnału.
+
+Do oceny można wykorzystać między innymi:
+
+- **WER (Word Error Rate)** – do porównania błędów rozpoznawania słów,
+- **STOI** – do oceny zrozumiałości mowy,
+- **PESQ** – do oceny jakości sygnału mowy.
+
+Takie porównanie pozwoli sprawdzić, które informacje można ograniczyć przy niewielkiej utracie jakości, a które są istotne dla rozpoznawania i odtwarzania mowy.
